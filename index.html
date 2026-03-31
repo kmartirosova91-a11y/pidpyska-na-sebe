@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Підписка на себе — Тест</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+font-family: ‘Georgia’, serif;
+background: #faf9f7;
+color: #2c2c2c;
+min-height: 100vh;
+display: flex;
+align-items: center;
+justify-content: center;
+padding: 20px;
+}
+
+.container {
+max-width: 640px;
+width: 100%;
+}
+
+.header {
+text-align: center;
+margin-bottom: 48px;
+}
+
+.header h1 {
+font-size: 13px;
+letter-spacing: 3px;
+text-transform: uppercase;
+color: #999;
+margin-bottom: 16px;
+}
+
+.header h2 {
+font-size: 28px;
+font-weight: normal;
+line-height: 1.4;
+color: #1a1a1a;
+}
+
+.header p {
+margin-top: 16px;
+font-size: 16px;
+color: #777;
+line-height: 1.6;
+font-style: italic;
+}
+
+.progress-bar {
+width: 100%;
+height: 2px;
+background: #e8e5e0;
+margin-bottom: 48px;
+border-radius: 2px;
+overflow: hidden;
+}
+
+.progress-fill {
+height: 100%;
+background: #2c2c2c;
+transition: width 0.4s ease;
+}
+
+.question-card {
+background: white;
+border-radius: 16px;
+padding: 40px;
+box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+margin-bottom: 24px;
+}
+
+.question-number {
+font-size: 12px;
+letter-spacing: 2px;
+text-transform: uppercase;
+color: #bbb;
+margin-bottom: 20px;
+}
+
+.question-text {
+font-size: 20px;
+line-height: 1.5;
+color: #1a1a1a;
+margin-bottom: 32px;
+}
+
+.options {
+display: flex;
+flex-direction: column;
+gap: 12px;
+}
+
+.option {
+padding: 16px 20px;
+border: 1.5px solid #e8e5e0;
+border-radius: 10px;
+cursor: pointer;
+font-size: 15px;
+line-height: 1.5;
+color: #444;
+transition: all 0.2s ease;
+text-align: left;
+background: white;
+}
+
+.option:hover {
+border-color: #2c2c2c;
+color: #1a1a1a;
+transform: translateY(-1px);
+}
+
+.option.selected {
+border-color: #2c2c2c;
+background: #2c2c2c;
+color: white;
+}
+
+.nav-btn {
+width: 100%;
+padding: 18px;
+background: #2c2c2c;
+color: white;
+border: none;
+border-radius: 10px;
+font-size: 16px;
+cursor: pointer;
+transition: all 0.2s ease;
+font-family: inherit;
+letter-spacing: 0.5px;
+}
+
+.nav-btn:hover {
+background: #1a1a1a;
+transform: translateY(-1px);
+}
+
+.nav-btn:disabled {
+background: #ddd;
+color: #aaa;
+cursor: not-allowed;
+transform: none;
+}
+
+/* Results */
+.result-card {
+background: white;
+border-radius: 16px;
+padding: 48px 40px;
+box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+text-align: center;
+display: none;
+}
+
+.result-emoji {
+font-size: 48px;
+margin-bottom: 24px;
+}
+
+.result-title {
+font-size: 24px;
+font-weight: normal;
+color: #1a1a1a;
+margin-bottom: 16px;
+line-height: 1.4;
+}
+
+.result-subtitle {
+font-size: 15px;
+color: #999;
+letter-spacing: 1px;
+text-transform: uppercase;
+margin-bottom: 24px;
+}
+
+.result-text {
+font-size: 16px;
+line-height: 1.8;
+color: #555;
+margin-bottom: 32px;
+}
+
+.result-cta {
+padding: 18px 32px;
+background: #2c2c2c;
+color: white;
+border: none;
+border-radius: 10px;
+font-size: 16px;
+cursor: pointer;
+font-family: inherit;
+transition: all 0.2s ease;
+display: inline-block;
+}
+
+.result-cta:hover {
+background: #1a1a1a;
+transform: translateY(-1px);
+}
+
+.score-dots {
+display: flex;
+justify-content: center;
+gap: 8px;
+margin-bottom: 32px;
+flex-wrap: wrap;
+}
+
+.dot {
+width: 10px;
+height: 10px;
+border-radius: 50%;
+background: #e8e5e0;
+}
+
+.dot.filled {
+background: #2c2c2c;
+}
+
+@media (max-width: 480px) {
+.question-card, .result-card { padding: 28px 24px; }
+.question-text { font-size: 18px; }
+.header h2 { font-size: 22px; }
+}
+</style>
+
+</head>
+<body>
+<div class="container">
+  <div class="header" id="header">
+    <h1>Підписка на себе</h1>
+    <h2>Ти справді хочеш того, чого хочеш?</h2>
+    <p>10 запитань. Відповідай чесно — або як зазвичай 😉</p>
+  </div>
+
+  <div class="progress-bar" id="progressBar">
+    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+  </div>
+
+  <div class="question-card" id="questionCard">
+    <div class="question-number" id="questionNumber">Питання 1 з 10</div>
+    <div class="question-text" id="questionText"></div>
+    <div class="options" id="optionsContainer"></div>
+  </div>
+
+<button class="nav-btn" id="nextBtn" disabled onclick="nextQuestion()">Далі →</button>
+
+  <div class="result-card" id="resultCard">
+    <div class="result-emoji" id="resultEmoji"></div>
+    <div class="result-subtitle" id="resultSubtitle"></div>
+    <div class="result-title" id="resultTitle"></div>
+    <div class="score-dots" id="scoreDots"></div>
+    <div class="result-text" id="resultText"></div>
+    <button class="result-cta" onclick="window.location.reload()">Пройти ще раз</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    text: "Ти часто кажеш собі 'ось досягну цього — і тоді буде добре'?",
+    options: [
+      { text: "Так, постійно. Ціль за ціллю.", score: 2 },
+      { text: "Іноді, але намагаюсь жити в моменті.", score: 1 },
+      { text: "Ні, я задоволена тим що є.", score: 0 },
+    ]
+  },
+  {
+    text: "Коли ти думаєш про те чого хочеш — це викликає радість чи тривогу?",
+    options: [
+      { text: "Частіше тривогу — бо ще не маю цього.", score: 2 },
+      { text: "Суміш обох.", score: 1 },
+      { text: "Радість. Я вірю що отримаю це.", score: 0 },
+    ]
+  },
+  {
+    text: "Ти робиш багато дій, але відчуваєш що крутишся на місці?",
+    options: [
+      { text: "Так, дій багато — результату мало.", score: 2 },
+      { text: "Буває, але загалом рухаюсь вперед.", score: 1 },
+      { text: "Мої дії дають результат.", score: 0 },
+    ]
+  },
+  {
+    text: "Якщо чесно — ти живеш своїм життям чи тим, яке 'правильне' за чиїмось сценарієм?",
+    options: [
+      { text: "Є відчуття що живу не зовсім своїм.", score: 2 },
+      { text: "Десь своїм, десь — ні.", score: 1 },
+      { text: "Своїм. Я сама вибудовую своє життя.", score: 0 },
+    ]
+  },
+  {
+    text: "Коли ти досягаєш чогось що дуже хотіла — відчуваєш повноту чи 'і що далі'?",
+    options: [
+      { text: "Частіше 'і що далі'. Радість швидко минає.", score: 2 },
+      { text: "По-різному залежить від цілі.", score: 1 },
+      { text: "Повноту і задоволення.", score: 0 },
+    ]
+  },
+  {
+    text: "Ти вмієш просити те що хочеш — не пояснюючи і не виправдовуючись?",
+    options: [
+      { text: "Важко. Завжди треба пояснити чому.", score: 2 },
+      { text: "Залежить від ситуації і людини.", score: 1 },
+      { text: "Так, прошу легко.", score: 0 },
+    ]
+  },
+  {
+    text: "Ти знаєш хто ти і про що ти — без ролей мами, доньки, колеги?",
+    options: [
+      { text: "Чесно — не дуже. Гублюсь без контексту.", score: 2 },
+      { text: "Загалом так, але є питання.", score: 1 },
+      { text: "Так, я добре знаю себе.", score: 0 },
+    ]
+  },
+  {
+    text: "Коли щось іде не так — ти шукаєш причину в собі чи навколо?",
+    options: [
+      { text: "Зазвичай в собі. Беру всю відповідальність.", score: 2 },
+      { text: "Намагаюсь дивитись об'єктивно.", score: 1 },
+      { text: "Аналізую ситуацію цілісно.", score: 0 },
+    ]
+  },
+  {
+    text: "Чи є у тебе щось важливе що ти відкладаєш роками — і завжди є 'причина' чому ще не час?",
+    options: [
+      { text: "Так. Знаю що хочу але завжди щось заважає.", score: 2 },
+      { text: "Є пара речей, але я над цим працюю.", score: 1 },
+      { text: "Ні, якщо хочу — роблю.", score: 0 },
+    ]
+  },
+  {
+    text: "Якщо б ти дозволила собі хотіти те що справді хочеш — ти знаєш що це?",
+    options: [
+      { text: "Не зовсім. Плутаюсь у своїх бажаннях.", score: 2 },
+      { text: "Здогадуюсь, але не впевнена.", score: 1 },
+      { text: "Так, я знаю свої справжні бажання.", score: 0 },
+    ]
+  }
+];
+
+const results = [
+  {
+    min: 0, max: 6,
+    emoji: "🌿",
+    subtitle: "Результат: Ти з собою",
+    title: "Схоже, ти досить чесна з собою",
+    text: "Ти розумієш чого хочеш і чому. Але якщо щось резонувало в цих питаннях — можливо є куточок де варто придивитись уважніше. Іноді найцікавіше ховається там де, здається, все і так зрозуміло."
+  },
+  {
+    min: 7, max: 13,
+    emoji: "🔍",
+    subtitle: "Результат: Є над чим подивитись",
+    title: "Ти рухаєшся, але щось не стикується",
+    text: "Ти не зовсім загублена — але є відчуття що дії є, а результату менше ніж хочеться. Або хочеш одне, а робиш інше. Це не погано — це сигнал що варто зупинитись і подивитись глибше. Часто одна чесна розмова дає більше ясності ніж місяці самоаналізу."
+  },
+  {
+    min: 14, max: 20,
+    emoji: "🪞",
+    subtitle: "Результат: Ласкаво просимо в клуб",
+    title: "Вітаю — ти себе трошки найобуєш 😄",
+    text: "Не тому що ти погана чи нечесна. А тому що між тим що ми думаємо що хочемо і тим що справді хочемо — часто ціла прірва. І побачити це самій майже неможливо. Саме тут і починається справжня робота — не з цілями, а з собою."
+  }
+];
+
+let current = 0;
+let answers = [];
+let totalScore = 0;
+
+function init() {
+  showQuestion(0);
+}
+
+function showQuestion(index) {
+  const q = questions[index];
+  document.getElementById('questionNumber').textContent = `Питання ${index + 1} з ${questions.length}`;
+  document.getElementById('questionText').textContent = q.text;
+  
+  const container = document.getElementById('optionsContainer');
+  container.innerHTML = '';
+  
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.textContent = opt.text;
+    btn.onclick = () => selectOption(i, opt.score);
+    if (answers[index] === i) btn.classList.add('selected');
+    container.appendChild(btn);
+  });
+
+  document.getElementById('progressFill').style.width = `${(index / questions.length) * 100}%`;
+  document.getElementById('nextBtn').disabled = answers[index] === undefined;
+  document.getElementById('nextBtn').textContent = index === questions.length - 1 ? 'Побачити результат →' : 'Далі →';
+}
+
+function selectOption(optionIndex, score) {
+  answers[current] = optionIndex;
+  
+  document.querySelectorAll('.option').forEach((btn, i) => {
+    btn.classList.toggle('selected', i === optionIndex);
+  });
+  
+  document.getElementById('nextBtn').disabled = false;
+}
+
+function nextQuestion() {
+  if (current < questions.length - 1) {
+    current++;
+    showQuestion(current);
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  totalScore = answers.reduce((sum, answerIndex, qIndex) => {
+    return sum + (questions[qIndex].options[answerIndex]?.score || 0);
+  }, 0);
+
+  const result = results.find(r => totalScore >= r.min && totalScore <= r.max);
+
+  document.getElementById('questionCard').style.display = 'none';
+  document.getElementById('nextBtn').style.display = 'none';
+  document.getElementById('progressBar').style.display = 'none';
+  document.getElementById('header').style.display = 'none';
+
+  const rc = document.getElementById('resultCard');
+  rc.style.display = 'block';
+
+  document.getElementById('resultEmoji').textContent = result.emoji;
+  document.getElementById('resultSubtitle').textContent = result.subtitle;
+  document.getElementById('resultTitle').textContent = result.title;
+  document.getElementById('resultText').textContent = result.text;
+
+  const dotsContainer = document.getElementById('scoreDots');
+  dotsContainer.innerHTML = '';
+  for (let i = 0; i < 20; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'dot' + (i < totalScore ? ' filled' : '');
+    dotsContainer.appendChild(dot);
+  }
+}
+
+init();
+</script>
+
+</body>
+</html>
